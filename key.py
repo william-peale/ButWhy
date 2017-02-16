@@ -12,6 +12,21 @@ class _Getch:
                 termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
             return ch
 
+def encode_command(motor, steps):
+    if(motor == 1):
+        initial_byte=0b00010000
+    elif(motor == 2):
+        initial_byte=0b00100000
+    else:
+        initial_byte=0b00110000
+    if(steps < 0):
+        initial_byte |= 1 << 7
+        steps = abs(steps)
+    for i in range(0,4):
+        print bin(-steps)
+        initial_byte ^= (-((steps >> i) & 1) ^ initial_byte) & (1 << i)
+    print bin(initial_byte) 
+        
 def get():
         inkey = _Getch()
         while(1):
@@ -19,28 +34,31 @@ def get():
                 if k!='':break
         if k=='\x1b[A':
                 print "up"
-                ser.write("000020000010".encode())
+                ser.write(encode_command(1,5))
         elif k=='\x1b[B':
                 print "down"
-                ser.write("000020000000".encode())
+                ser.write(encode_command(1,5))
         elif k=='\x1b[C':
                 print "right"
-                ser.write("010000000100".encode())
+                ser.write(encode_command(1,5))
         elif k=='\x1b[D':
                 print "left"
-                ser.write("010000000000".encode())
+                ser.write(encode_command(1,5))
         elif k =='aaa':
                 print "a"
-                ser.write("000000020000".encode())
+                ser.write(encode_command(1,5))
         elif k =='bbb':
                 print "b"
-                ser.write("000000020001".encode())
+                ser.write(encode_command(1,5))
+        elif k =='zzz':
+                exit(0)    
         else:
                 print "not an arrow key! {}".format(k)
 
+#Seriously wtf
 def main():
-        for i in range(0,1000):
-                get()
+        while True:
+            get()
 
 if __name__=='__main__':
         main()
